@@ -1,28 +1,45 @@
 import {useState, useCallback} from 'react';
 import './App.css';
-import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge } from '@xyflow/react';
+import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge, NodeProps, NodeChange, EdgeChange, Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
  
 const initialNodes = [
   { id: 'n1', position: { x: 0, y: 0 }, data: { label: 'Node 1' } },
   { id: 'n2', position: { x: 0, y: 100 }, data: { label: 'Node 2' } },
+  { id: 'n3', type: 'textUpdater', position: { x: 100, y: 100 }, data: { label: 'Node 3', } }
 ];
+
 const initialEdges = [{ id: 'n1-n2', source: 'n1', target: 'n2' }];
  
+export function TextUpdaterNode(props: NodeProps) {
+  const onChange = useCallback((evt: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(evt.target.value);
+  }, []);
+ 
+  return (
+    <div className="text-updater-node">
+      <div>
+        <label htmlFor="text">Text:</label>
+        <input id="text" name="text" onChange={onChange} className="nodrag" />
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
  
   const onNodesChange = useCallback(
-    (changes) => setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot)),
+    (changes: NodeChange<any>[]) => setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot)),
     [],
   );
   const onEdgesChange = useCallback(
-    (changes) => setEdges((edgesSnapshot) => applyEdgeChanges(changes, edgesSnapshot)),
+    (changes: EdgeChange[]) => setEdges((edgesSnapshot) => applyEdgeChanges(changes, edgesSnapshot)),
     [],
   );
   const onConnect = useCallback(
-    (params) => setEdges((edgesSnapshot) => addEdge(params, edgesSnapshot)),
+    (params: any) => setEdges((edgesSnapshot) => addEdge(params, edgesSnapshot)),
     [],
   );
  
@@ -31,6 +48,9 @@ function App() {
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        nodeTypes={{
+            textUpdater: TextUpdaterNode
+        }}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
